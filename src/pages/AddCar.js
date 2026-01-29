@@ -7,7 +7,7 @@ export default function AddCar() {
   const [brand, setBrand] = useState("");
   const [price, setPrice] = useState("");
   const [year, setYear] = useState("");
-  const [stocks, setStocks] = useState("");       // ✅ changed
+  const [stocks, setStocks] = useState("");
   const [carImage, setCarImage] = useState("");
 
   function handleSubmit(e) {
@@ -19,7 +19,7 @@ export default function AddCar() {
       brand: brand,
       price: price,
       year: year,
-      stocks: stocks,                             // ✅ changed
+      stocks: stocks,
       car_image: carImage,
     };
 
@@ -32,7 +32,7 @@ export default function AddCar() {
         setBrand("");
         setPrice("");
         setYear("");
-        setStocks("");                            // ✅ clear
+        setStocks("");
         setCarImage("");
       })
       .catch(() => {
