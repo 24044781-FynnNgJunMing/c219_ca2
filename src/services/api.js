@@ -1,18 +1,20 @@
-const API_URL = process.env.REACT_APP_API_URL || "https://onlinecarswebservice.onrender.com";
-
+const API_URL =
+  process.env.REACT_APP_API_URL ||
+  "https://onlinecarswebservice.onrender.com";
 
 function authHeader() {
   const token = localStorage.getItem("token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
+
 export function login(credentials) {
   return fetch(`${API_URL}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
   });
+}
 
-// Protect ONLY addCar in this demo
 export function addCar(car) {
   return fetch(`${API_URL}/addcar`, {
     method: "POST",
@@ -32,10 +34,8 @@ export async function getCars() {
 
 export async function updateCar(id, car) {
   const res = await fetch(`${API_URL}/editcar/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(car),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -44,7 +44,7 @@ export async function updateCar(id, car) {
 
 export async function deleteCar(id) {
   const res = await fetch(`${API_URL}/deletecar/${id}`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
