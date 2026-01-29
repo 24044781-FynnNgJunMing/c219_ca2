@@ -11,38 +11,38 @@ export function login(credentials) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
   });
-}
-// Protect ONLY addCard in this demo
-export function addCard(card) {
+
+// Protect ONLY addCar in this demo
+export function addCar(car) {
   return fetch(`${API_URL}/addcar`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...authHeader(),
     },
-    body: JSON.stringify(card),
+    body: JSON.stringify(car),
   });
 }
 
-export async function getCards() {
+export async function getCars() {
   const res = await fetch(`${API_URL}/allcars`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
-export async function updateCard(id, card) {
+export async function updateCar(id, car) {
   const res = await fetch(`${API_URL}/editcar/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(card),
+    body: JSON.stringify(car),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
-export async function deleteCard(id) {
+export async function deleteCar(id) {
   const res = await fetch(`${API_URL}/deletecar/${id}`, {
     method: 'DELETE',
   });
