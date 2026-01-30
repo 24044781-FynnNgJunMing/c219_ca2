@@ -1,5 +1,5 @@
 /* ========================================
-   MODERN CAR DEALERSHIP - BLACK & WHITE
+   MODERN STUDYSPACE APP - BLACK & WHITE
    Clean, Professional, Minimalist Design
    ======================================== */
 
@@ -112,93 +112,64 @@ p {
   padding: 0 var(--space-lg);
 }
 
-/* ===== NAVBAR (MODIFIED ONLY) ===== */
-.navbar {
+/* ===== NAVBAR (UPDATED) ===== */
+.navbar-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
 
-  /* modern glass look */
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
   border-bottom: 1px solid var(--border);
 }
 
-.navbar-content {
+.navbar-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.1rem var(--space-lg);
+  
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  /* slightly taller + cleaner */
-  padding: 1.1rem 0;
+  gap: var(--space-xl);
 }
 
 .navbar-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  text-decoration: none;
-
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: var(--black);
-  letter-spacing: -0.04em;
-  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .navbar-brand:hover {
   color: var(--gray-700);
 }
 
-/* emoji removed in JSX, so this prevents leftover spacing if class still exists somewhere */
-.brand-icon {
-  display: none;
-}
-
-.mobile-menu-toggle {
-  display: none;
-  flex-direction: column;
-  gap: 6px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: var(--space-xs);
-}
-
-.mobile-menu-toggle span {
-  width: 26px;
-  height: 2px;
-  background: var(--black);
-  border-radius: 2px;
-}
-
-.navbar-menu {
+.navbar-nav {
   display: flex;
-  list-style: none;
-  gap: var(--space-xl);
   align-items: center;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
 }
 
-/* smoother nav link look */
-.navbar-menu li a {
+.nav-link {
   text-decoration: none;
   color: var(--text-secondary);
-
   font-weight: 600;
   font-size: 0.95rem;
-
   padding: 0.35rem 0;
   position: relative;
-
   transition: color 0.2s ease;
+  white-space: nowrap;
 }
 
-/* underline animation on hover + active */
-.navbar-menu li a:not(.btn)::after {
+.nav-link::after {
   content: '';
   position: absolute;
   left: 0;
@@ -206,26 +177,39 @@ p {
   width: 100%;
   height: 2px;
   background: var(--black);
-
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.25s ease;
 }
 
-.navbar-menu li a:not(.btn):hover,
-.navbar-menu li a:not(.btn).active {
+.nav-link:hover,
+.nav-link.active {
   color: var(--black);
 }
 
-.navbar-menu li a:not(.btn):hover::after,
-.navbar-menu li a:not(.btn).active::after {
+.nav-link:hover::after,
+.nav-link.active::after {
   transform: scaleX(1);
 }
 
-/* make navbar button fit better */
-.navbar-menu .btn {
+/* Logout button in navbar */
+.navbar-nav button {
+  background: var(--black);
+  color: var(--white);
+  border: 2px solid var(--black);
+  padding: 0.6rem 1.4rem;
+  font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
   border-radius: var(--radius-md);
-  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.navbar-nav button:hover {
+  background: var(--gray-800);
+  border-color: var(--gray-800);
 }
 
 /* ===== BUTTONS ===== */
@@ -239,6 +223,7 @@ p {
   border: none;
   cursor: pointer;
   border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
 }
 
 .btn-primary {
@@ -345,6 +330,7 @@ p {
   border: 1px solid var(--border);
   padding: var(--space-xl);
   text-align: center;
+  transition: border-color 0.2s ease;
 }
 
 .feature-card:hover {
@@ -359,7 +345,6 @@ p {
   color: var(--text-muted);
   margin-bottom: var(--space-md);
 }
-
 
 .feature-card h3 {
   margin-bottom: var(--space-sm);
@@ -388,7 +373,7 @@ p {
   margin-bottom: var(--space-xl);
 }
 
-/* ===== CAR PAGES ===== */
+/* ===== STUDYSPACE PAGES (formerly CAR PAGES) ===== */
 .page-header {
   padding: calc(80px + var(--space-2xl)) var(--space-lg) var(--space-xl);
   background: var(--bg-secondary);
@@ -405,7 +390,7 @@ p {
   font-size: 1.125rem;
 }
 
-/* Car List */
+/* Space List */
 .car-list-page {
   padding: var(--space-2xl) 0 var(--space-3xl);
   min-height: 100vh;
@@ -422,6 +407,7 @@ p {
   background: var(--white);
   border: 1px solid var(--border);
   overflow: hidden;
+  transition: all 0.2s ease;
 }
 
 .car-card:hover {
@@ -567,6 +553,7 @@ p {
   font-family: var(--font-family);
   font-size: 1rem;
   border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease;
 }
 
 .car-form input:focus,
@@ -701,48 +688,23 @@ p {
     --space-3xl: 4rem;
   }
   
-  .mobile-menu-toggle {
-    display: flex;
+  .navbar-container {
+    flex-wrap: wrap;
   }
   
-  /* ===== NAVBAR (MODIFIED ONLY - MOBILE) ===== */
-  .navbar-menu {
-    position: absolute;
-    top: calc(100% + 12px);
-    left: var(--space-lg);
-    right: var(--space-lg);
-
-    flex-direction: column;
-    background: var(--white);
-    padding: var(--space-lg);
-
-    gap: var(--space-sm);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-
-    box-shadow: var(--shadow-xl);
-    display: none;
-  }
-  
-  .navbar-menu.mobile-open {
-    display: flex;
-  }
-  
-  .navbar-menu li {
+  .navbar-nav {
     width: 100%;
+    justify-content: center;
+    gap: var(--space-md);
   }
   
-  .navbar-menu li a {
-    display: block;
-    padding: var(--space-sm);
-    text-align: center;
-
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
+  .nav-link {
+    font-size: 0.875rem;
   }
-
-  .navbar-menu li a:not(.btn):hover {
-    background: var(--bg-secondary);
+  
+  .navbar-nav button {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.875rem;
   }
   
   .car-grid {
@@ -765,6 +727,28 @@ p {
   
   .container {
     padding: 0 var(--space-md);
+  }
+  
+  .navbar-container {
+    padding: 1rem var(--space-md);
+  }
+  
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+  
+  .navbar-nav {
+    gap: var(--space-sm);
+    font-size: 0.8rem;
+  }
+  
+  .nav-link {
+    font-size: 0.8rem;
+  }
+  
+  .navbar-nav button {
+    padding: 0.45rem 1rem;
+    font-size: 0.8rem;
   }
   
   .car-info {
