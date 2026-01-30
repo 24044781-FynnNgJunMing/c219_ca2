@@ -26,6 +26,7 @@ export default function Login() {
       }
 
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userRole", data.user.role);
       navigate("/spaces");
     } catch (e2) {
       console.error("Login error:", e2);
