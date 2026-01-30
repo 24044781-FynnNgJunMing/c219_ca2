@@ -8,6 +8,30 @@ export default function AddSpace() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
+  const userRole = localStorage.getItem("userRole");
+
+  if (userRole === "student") {
+    return (
+      <>
+        <div className="page-header">
+          <h2>Access Denied</h2>
+          <p>You are not authorised to add study spaces.</p>
+        </div>
+
+        <div className="form-page">
+          <div className="container">
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/spaces")}
+            >
+              Back to Study Spaces
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   async function handleSubmit(spaceData) {
     try {
       setBusy(true);

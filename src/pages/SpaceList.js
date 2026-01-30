@@ -7,7 +7,10 @@ export default function SpaceList() {
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
   const [zoneFilter, setZoneFilter] = useState("all");
   const [capacityFilter, setCapacityFilter] = useState("all");
-  const [hoveredFilter, setHoveredFilter] = useState(null); // 👈 NEW: track which filter is hovered
+  const [hoveredFilter, setHoveredFilter] = useState(null);
+  const [userRole, setUserRole] = useState(
+    () => localStorage.getItem("userRole")
+  );
 
   useEffect(() => {
     getSpaces()
@@ -39,20 +42,22 @@ export default function SpaceList() {
         <div className="empty-state container">
           <h3>No Study Spaces Available</h3>
           <p>Get started by adding your first study space</p>
-          <Link to="/spaces/new" className="btn btn-primary">
-            Add Study Space
-          </Link>
+
+          {/* 🚫 Students cannot see this button */}
+          {userRole !== "student" && (
+            <Link to="/spaces/new" className="btn btn-primary">
+              Add Study Space
+            </Link>
+          )}
         </div>
       </>
     );
   }
 
-  // Build zone options dynamically
   const zoneOptions = Array.from(
     new Set(spaces.map((s) => s.zone_type))
   ).filter(Boolean);
 
-  // Apply filters
   const filteredSpaces = spaces.filter((space) => {
     if (availabilityFilter === "available" && !space.is_available) {
       return false;
@@ -221,7 +226,6 @@ export default function SpaceList() {
                 </select>
               </div>
 
-              {/* Clear Filters */}
               <button
                 type="button"
                 onClick={() => {
@@ -254,7 +258,6 @@ export default function SpaceList() {
             </div>
           </div>
 
-          {/* 🔹 CARDS */}
           <div className="car-grid">
             {filteredSpaces.length === 0 && (
               <p>No spaces match the selected filters.</p>
@@ -307,12 +310,14 @@ export default function SpaceList() {
                   )}
 
                   <div className="car-actions">
-                    <Link
-                      to={`/spaces/${space.space_id}/edit`}
-                      className="btn btn-primary"
-                    >
-                      Edit Space
-                    </Link>
+                    {userRole !== "student" && (
+                      <Link
+                        to={`/spaces/${space.space_id}/edit`}
+                        className="btn btn-primary"
+                      >
+                        Edit Space
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

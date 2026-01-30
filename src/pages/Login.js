@@ -13,7 +13,7 @@ export default function Login() {
     e.preventDefault();
     setBusy(true);
     setError("");
-    
+
     try {
       const res = await login({ username, password });
       const data = await res.json();
@@ -26,7 +26,14 @@ export default function Login() {
       }
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("userRole", data.user.role);
+
+      const role =
+        (data.user && data.user.role) != null
+          ? data.user.role
+          : data.role;
+
+      localStorage.setItem("userRole", role);
+
       navigate("/spaces");
     } catch (e2) {
       console.error("Login error:", e2);
@@ -73,15 +80,18 @@ export default function Login() {
             </div>
 
             {error && (
-              <div className="error-message" style={{ marginBottom: 'var(--space-md)' }}>
+              <div
+                className="error-message"
+                style={{ marginBottom: "var(--space-md)" }}
+              >
                 {error}
               </div>
             )}
 
             <div className="form-actions">
-              <button 
-                type="submit" 
-                disabled={busy} 
+              <button
+                type="submit"
+                disabled={busy}
                 className="btn btn-primary"
               >
                 {busy ? "Logging in..." : "Login"}
