@@ -4,37 +4,42 @@ import { login } from "../services/api";
 
 export default function Login() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: "",
-    password: ""
+    password: "",
   });
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    
+    setLoading(true);
+
     try {
       const response = await login(formData);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Login failed");
       }
 
       const data = await response.json();
-      
+
       localStorage.setItem("token", data.token);
       localStorage.setItem("userRole", data.user.role);
+      localStorage.setItem("userId", data.user.id);
+
       navigate("/spaces");
     } catch (err) {
       setError(err.message || "Failed to login. Please check your credentials.");
@@ -87,16 +92,9 @@ export default function Login() {
               />
             </div>
 
-            {error && (
-              <div className="error-message" style={{ marginBottom: 'var(--space-md)' }}>
-                {error}
-              </div>
-            )}
-
             <div className="form-actions">
-              <button 
-                type="submit" 
-                disabled={busy} 
+              <button
+                type="submit"
                 className="btn btn-primary"
                 disabled={loading}
               >
