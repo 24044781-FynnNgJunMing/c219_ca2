@@ -5,9 +5,11 @@ export default function Navbar() {
 
   // Check if user is logged in
   const token = localStorage.getItem("token");
+  const userRole = localStorage.getItem("userRole");
   
   function handleLogout() {
     localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
     navigate("/");
   }
 
@@ -34,12 +36,14 @@ export default function Navbar() {
             Browse Spaces
           </NavLink>
 
-          <NavLink
-            to="/spaces/new"
-            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
-          >
-            Add Space
-          </NavLink>
+          {userRole === 'admin' && (
+            <NavLink
+              to="/spaces/new"
+              className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+            >
+              Add Space
+            </NavLink>
+          )}
 
           {token ? (
             <button onClick={handleLogout}>Logout</button>
