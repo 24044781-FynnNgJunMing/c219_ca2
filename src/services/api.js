@@ -4,6 +4,7 @@ function authHeader() {
   const token = localStorage.getItem("token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
+
 export function login(credentials) {
   return fetch(`${API_URL}/login`, {
     method: "POST",
@@ -34,6 +35,7 @@ export async function updateSpace(id, space) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
+      ...authHeader(),
     },
     body: JSON.stringify(space),
   });
@@ -47,4 +49,14 @@ export async function deleteSpace(id) {
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
+}
+
+export async function bookSpace(id, studentId) {
+  const now = new Date().toISOString();
+  
+  return updateSpace(id, {
+    is_available: 0,
+    booked_by: Number(studentId),
+    booking_time: now
+  });
 }

@@ -4,35 +4,45 @@ import { login } from "../services/api";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    password: ""
+  });
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setBusy(true);
     setError("");
-    
+    setLoading(true);
+
     try {
-      const res = await login({ username, password });
-      const data = await res.json();
-
-      console.log("Response status:", res.status);
-      console.log("Response data:", data);
-
-      if (!res.ok) {
-        throw new Error(data.error || `HTTP ${res.status}`);
+      const response = await login(formData);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
       }
 
+      const data = await response.json();
+      
       localStorage.setItem("token", data.token);
       localStorage.setItem("userRole", data.user.role);
+      localStorage.setItem("userId", data.user.userId);
+      
       navigate("/spaces");
-    } catch (e2) {
-      console.error("Login error:", e2);
-      setError(e2.message || "Login failed");
+    } catch (err) {
+      setError(err.message || "Failed to login. Please check your credentials.");
     } finally {
-      setBusy(false);
+      setLoading(false);
     }
   }
 
@@ -40,51 +50,53 @@ export default function Login() {
     <>
       <div className="page-header">
         <h2>Login</h2>
-        <p>Sign in to manage study spaces</p>
+        <p>Sign in to access your account</p>
       </div>
 
       <div className="form-page">
         <div className="container">
+          {error && (
+            <div className="error-message">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="car-form">
             <div className="form-group">
               <label htmlFor="username">Username</label>
               <input
-                type="text"
                 id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={busy}
+                name="username"
+                type="text"
+                value={formData.username}
+                onChange={handleChange}
                 placeholder="Enter your username"
                 required
+                disabled={loading}
               />
             </div>
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <input
-                type="password"
                 id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={busy}
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="Enter your password"
                 required
+                disabled={loading}
               />
             </div>
 
-            {error && (
-              <div className="error-message" style={{ marginBottom: 'var(--space-md)' }}>
-                {error}
-              </div>
-            )}
-
             <div className="form-actions">
-              <button 
-                type="submit" 
-                disabled={busy} 
+              <button
+                type="submit"
                 className="btn btn-primary"
+                disabled={loading}
               >
-                {busy ? "Logging in..." : "Login"}
+                {loading ? "Logging in..." : "Login"}
               </button>
             </div>
           </form>

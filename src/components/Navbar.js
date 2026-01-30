@@ -10,6 +10,7 @@ export default function Navbar() {
   function handleLogout() {
     localStorage.removeItem("token");
     localStorage.removeItem("userRole");
+    localStorage.removeItem("userId");
     navigate("/");
   }
 

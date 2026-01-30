@@ -6,7 +6,7 @@ const AUTO_RELEASE_MINUTES = 120;
 
 function parseAsLocal(bookingTime) {
   if (!bookingTime) return null;
-  return new Date(String(bookingTime).replace("Z", ""));
+  return new Date(bookingTime);
 }
 
 function isBookingExpired(bookingTime) {
@@ -28,13 +28,16 @@ function formatRemaining(bookingTime) {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
 
-  if (hours > 0) return `${hours}h ${minutes}m left`;
-  return `${minutes}m left`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 }
 
 export default function SpaceList() {
   const [spaces, setSpaces] = useState("");
   const [tick, setTick] = useState(0);
+
+  const userRole = localStorage.getItem("userRole");
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
     const timer = setInterval(() => setTick((t) => t + 1), 30000);
@@ -48,7 +51,7 @@ export default function SpaceList() {
 
         const expiredSpaces = data.filter(
           (s) =>
-            (s.is_available === 0 || s.is_available === false) &&
+            !s.is_available &&
             s.booking_time &&
             isBookingExpired(s.booking_time)
         );
@@ -61,17 +64,55 @@ export default function SpaceList() {
           });
         }
 
-        if (expiredSpaces.length > 0) {
-          const refreshed = await getSpaces();
-          setSpaces(refreshed);
-        } else {
-          setSpaces(data);
-        }
+        const refreshed =
+          expiredSpaces.length > 0 ? await getSpaces() : data;
+
+        setSpaces(refreshed);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     })();
-  }, []);
+  }, [tick]);
+
+  async function handleBookSpace(spaceId) {
+    if (!userId) {
+      alert("Please log in to book a space");
+      return;
+    }
+
+    try {
+      const now = new Date().toISOString();
+
+      await updateSpace(spaceId, {
+        is_available: 0,
+        booked_by: Number(userId),
+        booking_time: now,
+      });
+
+      const refreshed = await getSpaces();
+      setSpaces(refreshed);
+    } catch (error) {
+      alert("Failed to book space");
+    }
+  }
+
+  async function handleCancelBooking(spaceId) {
+    const ok = window.confirm("Cancel this booking?");
+    if (!ok) return;
+
+    try {
+      await updateSpace(spaceId, {
+        is_available: 1,
+        booked_by: null,
+        booking_time: null,
+      });
+
+      const refreshed = await getSpaces();
+      setSpaces(refreshed);
+    } catch (error) {
+      alert("Failed to cancel booking");
+    }
+  }
 
   if (spaces === "") {
     return (
@@ -79,24 +120,6 @@ export default function SpaceList() {
         <div className="loading-spinner"></div>
         <p>Loading study spaces...</p>
       </div>
-    );
-  }
-
-  if (spaces.length === 0) {
-    return (
-      <>
-        <div className="page-header">
-          <h2>Study Spaces</h2>
-          <p>Browse and manage available study areas</p>
-        </div>
-        <div className="empty-state container">
-          <h3>No Study Spaces Available</h3>
-          <p>Get started by adding your first study space</p>
-          <Link to="/spaces/new" className="btn btn-primary">
-            Add Study Space
-          </Link>
-        </div>
-      </>
     );
   }
 
@@ -121,12 +144,16 @@ export default function SpaceList() {
                   ? parseAsLocal(space.booking_time)?.toLocaleString("en-US", {
                       month: "short",
                       day: "numeric",
-                      year: "numeric",
                       hour: "numeric",
                       minute: "2-digit",
                       hour12: true,
                     })
                   : null;
+
+              const isOwner =
+                userRole !== "admin" &&
+                userId &&
+                Number(userId) === Number(space.booked_by);
 
               return (
                 <div key={space.id} className="car-card">
@@ -143,7 +170,18 @@ export default function SpaceList() {
                   <div className="car-details">
                     <h3 className="car-name">{space.space_name}</h3>
 
-                    <span className="car-brand">{space.zone_type} Zone</span>
+                    <div className="space-meta">
+                      <span className="zone-badge">{space.zone_type}</span>
+                      <span
+                        className={`status-badge ${
+                          space.is_available
+                            ? "status-available"
+                            : "status-booked"
+                        }`}
+                      >
+                        {space.is_available ? "● Available" : "● Booked"}
+                      </span>
+                    </div>
 
                     <div className="car-info">
                       <div className="info-item">
@@ -158,50 +196,65 @@ export default function SpaceList() {
                           {space.capacity === 1 ? "Person" : "People"}
                         </span>
                       </div>
+                    </div>
 
-                      <div className="info-item">
-                        <span className="info-label">Status</span>
-                        <span className="info-value">
-                          {space.is_available ? (
-                            <span style={{ color: "var(--status-available)" }}>
-                              Available
+                    <div className="booking-info">
+                      {!space.is_available ? (
+                        <>
+                          <div className="booking-detail">
+                            <span className="booking-label">Student ID</span>
+                            <span className="booking-value">
+                              {space.booked_by}
                             </span>
-                          ) : (
-                            <span style={{ color: "var(--status-booked)" }}>
-                              Booked
-                            </span>
+                          </div>
+
+                          {displayBookingTime && (
+                            <div className="booking-detail">
+                              <span className="booking-label">Booked at</span>
+                              <span className="booking-value">
+                                {displayBookingTime}
+                              </span>
+                            </div>
                           )}
-                        </span>
-                      </div>
 
-                      {!space.is_available && space.booked_by && (
-                        <div className="info-item">
-                          <span className="info-label">Booked By</span>
-                          <span className="info-value">ID: {space.booked_by}</span>
-                        </div>
-                      )}
-
-                      {!space.is_available && space.booking_time && (
-                        <div className="info-item">
-                          <span className="info-label">Time Left</span>
-                          <span className="info-value">{timeLeft}</span>
-                        </div>
+                          {timeLeft && (
+                            <div className="time-remaining">
+                              <span>{timeLeft} remaining</span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="booking-info-placeholder">—</div>
                       )}
                     </div>
 
-                    {!space.is_available && space.booking_time && (
-                      <p className="car-description">
-                        <strong>Booking Time:</strong> {displayBookingTime}
-                      </p>
-                    )}
-
                     <div className="car-actions">
-                      <Link
-                        to={`/spaces/${space.id}/edit`}
-                        className="btn btn-primary"
-                      >
-                        Edit Space
-                      </Link>
+                      {userRole === "admin" ? (
+                        <Link
+                          to={`/spaces/${space.id}/edit`}
+                          className="btn btn-primary"
+                        >
+                          Edit Space
+                        </Link>
+                      ) : space.is_available ? (
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => handleBookSpace(space.id)}
+                        >
+                          Book Space
+                        </button>
+                      ) : isOwner ? (
+                        <button
+                          className="btn btn-outline"
+                          onClick={() => handleCancelBooking(space.id)}
+                        >
+                          Cancel Booking
+                        </button>
+                      ) : (
+                        <button className="btn btn-outline" disabled>
+                          Unavailable
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
