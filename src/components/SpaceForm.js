@@ -9,6 +9,7 @@ export default function SpaceForm({ space, onSubmit, onCancel, busy }) {
     is_available: space?.is_available ?? true,
     booked_by: space?.booked_by ?? "",
     booking_time: space?.booking_time ?? "",
+    space_image: space?.space_image ?? "",
   });
 
   useEffect(() => {
@@ -22,16 +23,17 @@ export default function SpaceForm({ space, onSubmit, onCancel, busy }) {
       is_available: space.is_available ?? true,
       booked_by: space.booked_by ?? "",
       booking_time: space.booking_time ?? "",
+      space_image: space.space_image ?? "",
     });
   }, [space]);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
-
     const newValue = type === "checkbox" ? checked : value;
 
     setFormData((prev) => {
       const updated = { ...prev, [name]: newValue };
+
       if (name === "is_available" && checked === true) {
         updated.booked_by = "";
         updated.booking_time = "";
@@ -48,6 +50,13 @@ export default function SpaceForm({ space, onSubmit, onCancel, busy }) {
     if (!formData.location.trim()) return alert("Please enter a location");
     if (formData.capacity === "" || Number(formData.capacity) < 1)
       return alert("Capacity must be at least 1");
+
+    if (formData.space_image.trim() !== "") {
+      const img = formData.space_image.trim();
+      const looksLikeUrl = img.startsWith("http://") || img.startsWith("https://");
+      if (!looksLikeUrl) return alert("Space Image must start with http:// or https://");
+    }
+
     if (!formData.is_available) {
       if (formData.booked_by === "" || Number(formData.booked_by) < 1) {
         return alert("Please enter booked_by (student ID) if the space is not available");
@@ -63,9 +72,9 @@ export default function SpaceForm({ space, onSubmit, onCancel, busy }) {
       capacity: Number(formData.capacity),
       zone_type: formData.zone_type,
       is_available: Boolean(formData.is_available),
-      booked_by:
-        formData.booked_by === "" ? null : Number(formData.booked_by),
+      booked_by: formData.booked_by === "" ? null : Number(formData.booked_by),
       booking_time: formData.booking_time === "" ? null : formData.booking_time,
+      space_image: formData.space_image.trim() === "" ? null : formData.space_image.trim(), // ✅ NEW
     });
   }
 
@@ -132,6 +141,34 @@ export default function SpaceForm({ space, onSubmit, onCancel, busy }) {
           <option value="Quiet">Quiet</option>
           <option value="Discussion">Discussion</option>
         </select>
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="space_image">Space Image (URL)</label>
+        <input
+          type="text"
+          id="space_image"
+          name="space_image"
+          value={formData.space_image}
+          onChange={handleChange}
+          disabled={busy}
+          placeholder="e.g., https://example.com/space.jpg"
+        />
+        {formData.space_image.trim() !== "" && (
+          <div style={{ marginTop: "0.75rem" }}>
+            <p style={{ marginBottom: "0.5rem", color: "var(--text-muted)", fontSize: "0.9rem" }}>
+              Preview:
+            </p>
+            <img
+              src={formData.space_image}
+              alt="Space preview"
+              style={{ maxWidth: "100%", borderRadius: "8px", border: "1px solid var(--border)" }}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="form-group">
