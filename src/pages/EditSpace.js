@@ -49,7 +49,6 @@ export default function EditSpace() {
   const userRole = localStorage.getItem("userRole");
 
   useEffect(() => {
-    // no need to fetch if user is not allowed anyway
     if (userRole === "student") return;
     fetchSpace();
   }, [id, userRole]);
