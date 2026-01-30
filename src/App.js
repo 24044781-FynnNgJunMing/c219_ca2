@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import SpaceList from "./pages/SpaceList";
 import AddSpace from "./pages/AddSpace";
 import EditSpace from "./pages/EditSpace";
+import Login from "./pages/Login"
 import "./Styles.css";
 import Navbar from "./components/Navbar";
 
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/spaces" element={<SpaceList />} />
         <Route path="/spaces/new" element={<AddSpace />} />
         <Route path="/spaces/:id/edit" element={<EditSpace />}/>
+        <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );
