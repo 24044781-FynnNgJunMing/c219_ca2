@@ -1,68 +1,52 @@
-import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
-  const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
-  function isActive(path) {
-    return location.pathname === path;
-  }
-
-  function toggleMobileMenu() {
-    setMobileMenuOpen(!mobileMenuOpen);
+  // Check if user is logged in
+  const token = localStorage.getItem("token");
+  function handleLogout() {
+    localStorage.removeItem("token");
+    navigate("/"); // or /login
   }
 
   return (
-    <nav className="navbar">
-      <div className="container">
-        <div className="navbar-content">
-          <Link to="/" className="navbar-brand">
-            <span>MOTORS</span>
-          </Link>
+    <header className="navbar-header">
+      <div className="navbar-container">
+        <strong className="navbar-brand">
+          📇 StudySpace App
+        </strong>
 
-          <button 
-            className="mobile-menu-toggle"
-            onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
+        <nav className="navbar-nav">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
           >
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
+            Home
+          </NavLink>
 
-          <ul className={`navbar-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <li>
-              <Link 
-                to="/" 
-                className={isActive("/") ? "active" : ""}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/cars" 
-                className={isActive("/cars") ? "active" : ""}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Cars
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/cars/new" 
-                className="btn btn-primary"
-                style={{ color: 'white' }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Add Car
-              </Link>
-            </li>
-          </ul>
-        </div>
+          <NavLink
+            to="/spaces"
+            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+          >
+            Study Space List
+          </NavLink>
+
+          <NavLink
+            to="/spaces/new"
+            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+          >
+            Add Study Space
+          </NavLink>
+
+          {token ? (
+            <button onClick={handleLogout}>Logout</button>
+          ) : (
+            <NavLink to="/login">Login</NavLink>
+          )}
+        </nav>
       </div>
-    </nav>
+    </header>
   );
 }

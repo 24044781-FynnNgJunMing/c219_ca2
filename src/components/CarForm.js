@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function CarForm({ car, onSubmit, onCancel, busy }) {
+export default function SpaceForm({ space, onSubmit, onCancel, busy }) {
   const [formData, setFormData] = useState({
     car_name: car?.car_name || "",
     car_description: car?.car_description || "",
