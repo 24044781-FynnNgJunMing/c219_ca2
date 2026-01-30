@@ -5,6 +5,7 @@ import AddSpace from "./pages/AddSpace";
 import EditSpace from "./pages/EditSpace";
 import BookSpace from "./pages/BookSpace";
 import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import "./Styles.css";
@@ -17,28 +18,24 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
 
-        <Route
-          path="/spaces"
-          element={
-            <ProtectedRoute>
-              <SpaceList />
-            </ProtectedRoute>
-          }
-        />
+        {/* Public: anyone can view spaces */}
+        <Route path="/spaces" element={<SpaceList />} />
 
+        {/* Must be logged in (student OR admin) */}
         <Route
           path="/spaces/:id/book"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={["student", "admin"]}>
               <BookSpace />
             </ProtectedRoute>
           }
         />
 
+        {/* Admin only */}
         <Route
           path="/spaces/new"
           element={
-            <ProtectedRoute role="admin">
+            <ProtectedRoute roles={["admin"]}>
               <AddSpace />
             </ProtectedRoute>
           }
@@ -47,11 +44,13 @@ export default function App() {
         <Route
           path="/spaces/:id/edit"
           element={
-            <ProtectedRoute role="admin">
+            <ProtectedRoute roles={["admin"]}>
               <EditSpace />
             </ProtectedRoute>
           }
         />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

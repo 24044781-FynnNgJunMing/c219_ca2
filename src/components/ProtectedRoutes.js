@@ -1,15 +1,13 @@
-import { Navigate } from "react-router-dom";
+import NotFound from "../pages/NotFound";
 
-export default function ProtectedRoute({ children, role }) {
+export default function ProtectedRoute({ children, roles }) {
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("userRole");
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!token) return <NotFound />;
 
-  if (role && userRole !== role) {
-    return <Navigate to="/spaces" replace />;
+  if (Array.isArray(roles) && roles.length > 0 && !roles.includes(userRole)) {
+    return <NotFound />;
   }
 
   return children;

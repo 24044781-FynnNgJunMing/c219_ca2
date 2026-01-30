@@ -46,6 +46,9 @@ export async function updateSpace(id, space) {
 export async function deleteSpace(id) {
   const res = await fetch(`${API_URL}/deletespace/${id}`, {
     method: 'DELETE',
+    headers: {
+      ...authHeader(),
+    },
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();

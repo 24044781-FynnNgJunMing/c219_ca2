@@ -36,6 +36,7 @@ export default function SpaceList() {
   const [spaces, setSpaces] = useState("");
   const [tick, setTick] = useState(0);
 
+  const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("userRole");
   const userId = localStorage.getItem("userId");
 
@@ -64,9 +65,7 @@ export default function SpaceList() {
           });
         }
 
-        const refreshed =
-          expiredSpaces.length > 0 ? await getSpaces() : data;
-
+        const refreshed = expiredSpaces.length > 0 ? await getSpaces() : data;
         setSpaces(refreshed);
       } catch (error) {
         console.error(error);
@@ -75,7 +74,7 @@ export default function SpaceList() {
   }, [tick]);
 
   async function handleBookSpace(spaceId) {
-    if (!userId) {
+    if (!token || !userId) {
       alert("Please log in to book a space");
       return;
     }
@@ -92,11 +91,17 @@ export default function SpaceList() {
       const refreshed = await getSpaces();
       setSpaces(refreshed);
     } catch (error) {
+      console.error(error);
       alert("Failed to book space");
     }
   }
 
   async function handleCancelBooking(spaceId) {
+    if (!token || !userId) {
+      alert("Please log in");
+      return;
+    }
+
     const ok = window.confirm("Cancel this booking?");
     if (!ok) return;
 
@@ -110,6 +115,7 @@ export default function SpaceList() {
       const refreshed = await getSpaces();
       setSpaces(refreshed);
     } catch (error) {
+      console.error(error);
       alert("Failed to cancel booking");
     }
   }
@@ -235,6 +241,10 @@ export default function SpaceList() {
                           className="btn btn-primary"
                         >
                           Edit Space
+                        </Link>
+                      ) : !token ? (
+                        <Link to="/login" className="btn btn-outline">
+                          Login to Book
                         </Link>
                       ) : space.is_available ? (
                         <button
