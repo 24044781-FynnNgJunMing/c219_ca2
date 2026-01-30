@@ -1,54 +1,42 @@
-import { useNavigate } from "react-router-dom";
-import CarForm from "../components/CarForm";
-import { addCar } from "../services/api";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import SpaceForm from "../components/SpaceForm";
+import { addSpace } from "../services/api";
 
-export default function AddCar() {
+export default function AddSpace() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
-  async function handleSubmit(carData) {
+  async function handleSubmit(spaceData) {
     try {
       setBusy(true);
       setError(null);
 
-      await addCar(carData);
-      navigate("/cars");
+      await addSpace(spaceData);
+      navigate("/spaces");
     } catch (err) {
-      setError(err.message || "Failed to add car");
+      setError(err.message || "Failed to add space");
       setBusy(false);
     }
   }
 
   function handleCancel() {
-    navigate("/cars");
+    navigate("/spaces");
   }
 
   return (
-    <>
-      <div className="page-header">
-        <div className="container">
-          <h2>Add New Car</h2>
-          <p>Add a vehicle to your collection</p>
-        </div>
-      </div>
+    <div>
+      <h2>Add Study Space</h2>
 
-      <div className="form-page">
-        <div className="container">
-          {error && (
-            <div className="error-message">
-              <strong>Error:</strong> {error}
-            </div>
-          )}
+      {error && <p>Error: {error}</p>}
 
-          <CarForm
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            busy={busy}
-          />
-        </div>
-      </div>
-    </>
+      <SpaceForm
+        space={null}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        busy={busy}
+      />
+    </div>
   );
 }
