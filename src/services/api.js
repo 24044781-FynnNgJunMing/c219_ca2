@@ -1,6 +1,6 @@
 const API_URL =
   process.env.REACT_APP_API_URL ||
-  "https://onlinestudyspaceswebservice.onrender.com/";
+  "https://onlinecarswebservice.onrender.com";
 
 function authHeader() {
   const token = localStorage.getItem("token");
