@@ -8,23 +8,32 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [busy, setBusy] = useState(false);
+    
     async function handleSubmit(e) {
         e.preventDefault();
         setBusy(true);
         setError("");
         try {
             const res = await login({ username, password });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
+            
+            console.log("Response status:", res.status);
+            console.log("Response data:", data);
+            
+            if (!res.ok) {
+                throw new Error(data.error || `HTTP ${res.status}`);
+            }
+            
             localStorage.setItem("token", data.token);
             navigate("/spaces/new");
         } catch (e2) {
-            console.error(e2);
-            setError("Login failed");
+            console.error("Login error:", e2);
+            setError(e2.message || "Login failed");
         } finally {
             setBusy(false);
         }
     }
+    
     return (
         <main>
             <h2>Login</h2>

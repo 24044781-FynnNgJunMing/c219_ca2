@@ -1,12 +1,9 @@
-const API_URL =
-  process.env.REACT_APP_API_URL ||
-  "https://onlinestudyspaceswebservice.onrender.com";
+const API_URL = process.env.REACT_APP_API_URL || "https://onlinestudyspaceswebservice.onrender.com";
 
 function authHeader() {
   const token = localStorage.getItem("token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
-
 export function login(credentials) {
   return fetch(`${API_URL}/login`, {
     method: "POST",
@@ -34,10 +31,9 @@ export async function getSpaces() {
 
 export async function updateSpace(id, space) {
   const res = await fetch(`${API_URL}/editspace/${id}`, {
-    method: "PUT",
-    headers: { 
-      "Content-Type": "application/json",
-      ...authHeader()
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(space),
   });
@@ -47,10 +43,7 @@ export async function updateSpace(id, space) {
 
 export async function deleteSpace(id) {
   const res = await fetch(`${API_URL}/deletespace/${id}`, {
-    method: "DELETE",
-    headers: {
-      ...authHeader()
-    }
+    method: 'DELETE',
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
