@@ -12,7 +12,7 @@ export default function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/spacec" element={<SpaceList />} />
+        <Route path="/spaces" element={<SpaceList />} />
         <Route path="/spaces/new" element={<AddSpace />} />
         <Route path="/spaces/:id/edit" element={<EditSpace />}/>
       </Routes>
