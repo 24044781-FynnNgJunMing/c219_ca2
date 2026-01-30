@@ -28,13 +28,10 @@ export default function SpaceForm({ space, onSubmit, onCancel, busy }) {
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
 
-    // Checkbox uses checked instead of value
     const newValue = type === "checkbox" ? checked : value;
 
     setFormData((prev) => {
       const updated = { ...prev, [name]: newValue };
-
-      // If available is true, booking fields should be cleared
       if (name === "is_available" && checked === true) {
         updated.booked_by = "";
         updated.booking_time = "";
@@ -59,7 +56,7 @@ export default function SpaceForm({ space, onSubmit, onCancel, busy }) {
         return alert("Please select a booking time if the space is not available");
       }
     }
-    
+
     onSubmit({
       space_name: formData.space_name.trim(),
       location: formData.location.trim(),
@@ -153,7 +150,6 @@ export default function SpaceForm({ space, onSubmit, onCancel, busy }) {
         </p>
       </div>
 
-      {/* Booking fields only when NOT available */}
       {!formData.is_available && (
         <>
           <div className="form-group">
