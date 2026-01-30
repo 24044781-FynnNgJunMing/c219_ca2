@@ -9,17 +9,19 @@ function toDateTimeLocal(value) {
   if (Number.isNaN(d.getTime())) return "";
 
   const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+    d.getDate()
+  )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function toMySQLDateTime(value) {
   if (!value) return null;
 
   if (value.includes("T")) {
-    const [date, time] = value.split("T");
-    const hhmm = (time || "").slice(0, 5);
+    const parts = value.split("T");
+    const date = parts[0];
+    const time = parts[1] || "";
+    const hhmm = time.slice(0, 5);
     if (!date || hhmm.length !== 5) return null;
     return `${date} ${hhmm}:00`;
   }
@@ -27,9 +29,9 @@ function toMySQLDateTime(value) {
   const d = new Date(value);
   if (!Number.isNaN(d.getTime())) {
     const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
-      d.getHours()
-    )}:${pad(d.getMinutes())}:00`;
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+      d.getDate()
+    )} ${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
   }
 
   return null;
@@ -44,9 +46,13 @@ export default function EditSpace() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
+  const userRole = localStorage.getItem("userRole");
+
   useEffect(() => {
+    // no need to fetch if user is not allowed anyway
+    if (userRole === "student") return;
     fetchSpace();
-  }, [id]);
+  }, [id, userRole]);
 
   async function fetchSpace() {
     try {
@@ -89,7 +95,6 @@ export default function EditSpace() {
         location: spaceData.location,
         capacity: Number(spaceData.capacity),
         zone_type: spaceData.zone_type,
-
         is_available:
           spaceData.is_available === true ||
           spaceData.is_available === "true" ||
@@ -98,17 +103,14 @@ export default function EditSpace() {
           spaceData.is_available === "on"
             ? 1
             : 0,
-
         booked_by:
           spaceData.booked_by === "" || spaceData.booked_by == null
             ? null
             : Number(spaceData.booked_by),
-
         booking_time:
           spaceData.booking_time === "" || spaceData.booking_time == null
             ? null
             : toMySQLDateTime(spaceData.booking_time),
-
         space_image: spaceData.space_image ?? null,
       };
 
@@ -145,61 +147,117 @@ export default function EditSpace() {
     navigate("/spaces");
   }
 
-  if (loading) {
+  // 🚫 Block students from editing spaces – same layout style as AddSpace guard
+  if (userRole === "student") {
     return (
-      <main className="editspace-loading">
-        <h1>Edit Study Space</h1>
-        <p>Loading study space...</p>
-      </main>
-    );
-  }
-
-  if (error && !space) {
-    return (
-      <main className="editspace-notfound">
-        <h1>Edit Study Space</h1>
-        <p className="spacelist-error-text">Error: {error}</p>
-        <button
-          onClick={() => navigate("/spaces")}
-          className="editspace-back-button"
-        >
-          Back to Space List
-        </button>
-      </main>
-    );
-  }
-
-  return (
-    <main className="editspace-main">
-      <h1 className="editspace-title">Edit Study Space</h1>
-
-      {error && (
-        <div className="editspace-error">
-          <strong>Error:</strong> {error}
+      <>
+        <div className="page-header">
+          <h2>Access Denied</h2>
+          <p>You are not authorised to edit study spaces.</p>
         </div>
-      )}
 
-      {space && (
-        <>
-          <SpaceForm
-            space={space}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            busy={busy}
-          />
-
-          <div className="editspace-delete">
+        <div className="form-page">
+          <div className="container">
             <button
-              type="button"
-              onClick={handleDelete}
-              disabled={busy}
-              className="editspace-delete-button"
+              onClick={() => navigate("/spaces")}
+              className="btn btn-primary"
             >
-              Delete Space
+              Back to Study Spaces
             </button>
           </div>
-        </>
-      )}
-    </main>
+        </div>
+      </>
+    );
+  }
+
+  // Loading state – same style wrapper
+  if (loading) {
+    return (
+      <>
+        <div className="page-header">
+          <h2>Edit Study Space</h2>
+          <p>Loading study space...</p>
+        </div>
+
+        <div className="form-page">
+          <div className="container">
+            <p>Loading study space...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Error with no space found – same style wrapper
+  if (error && !space) {
+    return (
+      <>
+        <div className="page-header">
+          <h2>Edit Study Space</h2>
+          <p>Unable to load this study space.</p>
+        </div>
+
+        <div className="form-page">
+          <div className="container">
+            <div className="error-message">
+              <strong>Error:</strong> {error}
+            </div>
+            <button
+              onClick={() => navigate("/spaces")}
+              className="btn btn-primary"
+            >
+              Back to Space List
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Main edit form – matches AddSpace layout, but with Edit text + delete section
+  return (
+    <>
+      <div className="page-header">
+        <h2>Edit Study Space</h2>
+        <p>Update the details of this study space</p>
+      </div>
+
+      <div className="form-page">
+        <div className="container">
+          {error && (
+            <div className="error-message">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
+
+          {space && (
+            <>
+              <SpaceForm
+                space={space}
+                onSubmit={handleSubmit}
+                onCancel={handleCancel}
+                busy={busy}
+              />
+
+              <div className="delete-section">
+                <h3>Delete Space</h3>
+                <p>
+                  Once you delete this space, there is no going back. Please be
+                  certain.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={busy}
+                  className="btn btn-danger"
+                >
+                  Delete Space
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

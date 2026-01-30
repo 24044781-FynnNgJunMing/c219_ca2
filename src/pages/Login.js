@@ -22,8 +22,7 @@ export default function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    setLoading(true);
-
+    
     try {
       const response = await login(formData);
       
@@ -36,8 +35,6 @@ export default function Login() {
       
       localStorage.setItem("token", data.token);
       localStorage.setItem("userRole", data.user.role);
-      localStorage.setItem("userId", data.user.userId);
-      
       navigate("/spaces");
     } catch (err) {
       setError(err.message || "Failed to login. Please check your credentials.");
@@ -90,9 +87,16 @@ export default function Login() {
               />
             </div>
 
+            {error && (
+              <div className="error-message" style={{ marginBottom: 'var(--space-md)' }}>
+                {error}
+              </div>
+            )}
+
             <div className="form-actions">
-              <button
-                type="submit"
+              <button 
+                type="submit" 
+                disabled={busy} 
                 className="btn btn-primary"
                 disabled={loading}
               >
