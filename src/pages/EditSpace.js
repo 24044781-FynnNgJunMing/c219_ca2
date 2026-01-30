@@ -1,95 +1,111 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import CarForm from "../components/CarForm";
-import { getCars, updateCar, deleteCar } from "../services/api";
+import SpaceForm from "../components/SpaceForm";
+import { getSpaces, updateSpace, deleteSpace } from "../services/api";
 
-export default function EditCar() {
+export default function EditSpace() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [car, setCar] = useState(null);
+  const [space, setSpace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchCar();
+    async function fetchSpace() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const spaces = await getSpaces();
+
+        const found = spaces.find((s) => s.space_id === parseInt(id, 10));
+
+        if (!found) setError("Study space not found");
+        else setSpace(found);
+      } catch (err) {
+        setError(err.message || "Failed to load study space");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSpace();
   }, [id]);
 
-  async function fetchCar() {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const cars = await getCars();
-      const foundCar = cars.find((c) => c.id === parseInt(id));
-
-      if (!foundCar) setError("Car not found");
-      else setCar(foundCar);
-    } catch (err) {
-      setError(err.message || "Failed to load car");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleSubmit(carData) {
+  async function handleSubmit(spaceData) {
     try {
       setBusy(true);
       setError(null);
-      await updateCar(id, carData);
-      navigate("/cars");
+      
+      const payload = {
+        space_name: spaceData.space_name,
+        location: spaceData.location,
+        capacity: Number(spaceData.capacity),
+        zone_type: spaceData.zone_type,
+        is_available: Boolean(spaceData.is_available),
+        booked_by: spaceData.booked_by === "" || spaceData.booked_by == null
+          ? null
+          : Number(spaceData.booked_by),
+        booking_time: spaceData.booking_time === "" ? null : spaceData.booking_time,
+      };
+
+      await updateSpace(id, payload);
+      navigate("/spaces");
     } catch (err) {
-      setError(err.message || "Failed to update car");
+      setError(err.message || "Failed to update study space");
       setBusy(false);
     }
   }
 
   async function handleDelete() {
-    if (!car) return;
+    if (!space) return;
 
-    const ok = window.confirm(`Delete "${car.car_name}"? This cannot be undone.`);
+    const ok = window.confirm(
+      `Delete "${space.space_name}"? This cannot be undone.`
+    );
     if (!ok) return;
 
     try {
       setBusy(true);
       setError(null);
-      await deleteCar(id);
-      navigate("/cars");
+      await deleteSpace(id);
+      navigate("/spaces");
     } catch (err) {
-      setError(err.message || "Failed to delete car");
+      setError(err.message || "Failed to delete study space");
       setBusy(false);
     }
   }
 
   function handleCancel() {
-    navigate("/cars");
+    navigate("/spaces");
   }
 
   if (loading) {
     return (
       <div className="loading-message">
         <div className="loading-spinner"></div>
-        <p>Loading car...</p>
+        <p>Loading study space...</p>
       </div>
     );
   }
 
-  if (error && !car) {
+  if (error && !space) {
     return (
       <>
         <div className="page-header">
           <div className="container">
-            <h2>Edit Car</h2>
+            <h2>Edit Study Space</h2>
           </div>
         </div>
+
         <div className="form-page">
           <div className="container">
-            <div className="error-message">
-              {error}
-            </div>
-            <button onClick={() => navigate("/cars")} className="btn btn-primary">
-              Back to Car List
+            <div className="error-message">{error}</div>
+
+            <button onClick={() => navigate("/spaces")} className="btn btn-primary">
+              Back to Spaces
             </button>
           </div>
         </div>
@@ -101,8 +117,8 @@ export default function EditCar() {
     <>
       <div className="page-header">
         <div className="container">
-          <h2>Edit Car</h2>
-          <p>Update car details</p>
+          <h2>Edit Study Space</h2>
+          <p>Update study space details</p>
         </div>
       </div>
 
@@ -114,19 +130,19 @@ export default function EditCar() {
             </div>
           )}
 
-          {car && (
+          {space && (
             <>
-              <CarForm
-                car={car}
+              <SpaceForm
+                space={space}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
                 busy={busy}
               />
 
               <div className="delete-section">
-                <h3>Delete Car</h3>
+                <h3>Delete Study Space</h3>
                 <p>
-                  Once you delete this car, there is no going back. 
+                  Once you delete this study space, it cannot be recovered.
                   Please be certain.
                 </p>
                 <button
@@ -135,7 +151,7 @@ export default function EditCar() {
                   disabled={busy}
                   className="btn btn-danger"
                 >
-                  Delete Car
+                  Delete Space
                 </button>
               </div>
             </>
