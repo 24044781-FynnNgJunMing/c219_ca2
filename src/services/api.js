@@ -1,6 +1,6 @@
 const API_URL =
   process.env.REACT_APP_API_URL ||
-  "https://onlinecarswebservice.onrender.com";
+  "https://onlinestudyspaceswebservice.onrender.com/";
 
 function authHeader() {
   const token = localStorage.getItem("token");
@@ -15,35 +15,35 @@ export function login(credentials) {
   });
 }
 
-export function addCar(car) {
-  return fetch(`${API_URL}/addcar`, {
+export function addSpace(space) {
+  return fetch(`${API_URL}/addspace`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...authHeader(),
     },
-    body: JSON.stringify(car),
+    body: JSON.stringify(space),
   });
 }
 
-export async function getCars() {
-  const res = await fetch(`${API_URL}/allcars`);
+export async function getSpaces() {
+  const res = await fetch(`${API_URL}/allspaces`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
-export async function updateCar(id, car) {
-  const res = await fetch(`${API_URL}/editcar/${id}`, {
+export async function updateSpace(id, space) {
+  const res = await fetch(`${API_URL}/editspace/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(car),
+    body: JSON.stringify(space),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
-export async function deleteCar(id) {
-  const res = await fetch(`${API_URL}/deletecar/${id}`, {
+export async function deleteSpace(id) {
+  const res = await fetch(`${API_URL}/deletespace/${id}`, {
     method: "DELETE",
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
