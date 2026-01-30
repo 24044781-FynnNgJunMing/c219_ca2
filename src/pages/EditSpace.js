@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import SpaceForm from "../components/SpaceForm";
 import { getSpaces, updateSpace, deleteSpace } from "../services/api";
 
-// ISO (or date string) -> "YYYY-MM-DDTHH:mm" for <input type="datetime-local" />
 function toDateTimeLocal(value) {
   if (!value) return "";
   const d = new Date(value);
@@ -15,11 +14,9 @@ function toDateTimeLocal(value) {
   )}:${pad(d.getMinutes())}`;
 }
 
-// "YYYY-MM-DDTHH:mm" -> "YYYY-MM-DD HH:mm:00" (safer for MySQL DATETIME)
 function toMySQLDateTime(value) {
   if (!value) return null;
 
-  // already in datetime-local format
   if (value.includes("T")) {
     const [date, time] = value.split("T");
     const hhmm = (time || "").slice(0, 5);
@@ -27,7 +24,6 @@ function toMySQLDateTime(value) {
     return `${date} ${hhmm}:00`;
   }
 
-  // if user somehow passes ISO string, convert it
   const d = new Date(value);
   if (!Number.isNaN(d.getTime())) {
     const pad = (n) => String(n).padStart(2, "0");
@@ -50,7 +46,6 @@ export default function EditSpace() {
 
   useEffect(() => {
     fetchSpace();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   async function fetchSpace() {
@@ -67,7 +62,6 @@ export default function EditSpace() {
         return;
       }
 
-      // Normalize for the form (helps checkbox + datetime-local input)
       setSpace({
         ...foundSpace,
         is_available:
@@ -96,7 +90,6 @@ export default function EditSpace() {
         capacity: Number(spaceData.capacity),
         zone_type: spaceData.zone_type,
 
-        // send 1/0 (MySQL boolean commonly stored/returned as 1/0)
         is_available:
           spaceData.is_available === true ||
           spaceData.is_available === "true" ||
@@ -111,7 +104,6 @@ export default function EditSpace() {
             ? null
             : Number(spaceData.booked_by),
 
-        // send MySQL-friendly datetime, or null
         booking_time:
           spaceData.booking_time === "" || spaceData.booking_time == null
             ? null
