@@ -52,7 +52,7 @@ export default function SpaceList() {
             <p>Booking Time: {space.booking_time}</p>
           )}
 
-          <Link to={`/spaces/${space.space_id}/edit`}>
+          <Link to={`/spaces/${space.id}/edit`}>
             Edit
           </Link>
 

@@ -3,6 +3,42 @@ import { useNavigate, useParams } from "react-router-dom";
 import SpaceForm from "../components/SpaceForm";
 import { getSpaces, updateSpace, deleteSpace } from "../services/api";
 
+// ISO (or date string) -> "YYYY-MM-DDTHH:mm" for <input type="datetime-local" />
+function toDateTimeLocal(value) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`;
+}
+
+// "YYYY-MM-DDTHH:mm" -> "YYYY-MM-DD HH:mm:00" (safer for MySQL DATETIME)
+function toMySQLDateTime(value) {
+  if (!value) return null;
+
+  // already in datetime-local format
+  if (value.includes("T")) {
+    const [date, time] = value.split("T");
+    const hhmm = (time || "").slice(0, 5);
+    if (!date || hhmm.length !== 5) return null;
+    return `${date} ${hhmm}:00`;
+  }
+
+  // if user somehow passes ISO string, convert it
+  const d = new Date(value);
+  if (!Number.isNaN(d.getTime())) {
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
+      d.getHours()
+    )}:${pad(d.getMinutes())}:00`;
+  }
+
+  return null;
+}
+
 export default function EditSpace() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -13,48 +49,82 @@ export default function EditSpace() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchSpace() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const spaces = await getSpaces();
-
-        const found = spaces.find((s) => s.space_id === parseInt(id, 10));
-
-        if (!found) setError("Study space not found");
-        else setSpace(found);
-      } catch (err) {
-        setError(err.message || "Failed to load study space");
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchSpace();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  async function fetchSpace() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const spaces = await getSpaces();
+      const foundSpace = spaces.find((s) => s.id === parseInt(id, 10));
+
+      if (!foundSpace) {
+        setError("Study space not found");
+        setSpace(null);
+        return;
+      }
+
+      // Normalize for the form (helps checkbox + datetime-local input)
+      setSpace({
+        ...foundSpace,
+        is_available:
+          foundSpace.is_available === 1 ||
+          foundSpace.is_available === true ||
+          foundSpace.is_available === "1" ||
+          foundSpace.is_available === "true",
+        booking_time: toDateTimeLocal(foundSpace.booking_time),
+      });
+    } catch (err) {
+      setError(err.message || "Failed to load study space");
+      setSpace(null);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSubmit(spaceData) {
     try {
       setBusy(true);
       setError(null);
-      
+
       const payload = {
         space_name: spaceData.space_name,
         location: spaceData.location,
         capacity: Number(spaceData.capacity),
         zone_type: spaceData.zone_type,
-        is_available: Boolean(spaceData.is_available),
-        booked_by: spaceData.booked_by === "" || spaceData.booked_by == null
-          ? null
-          : Number(spaceData.booked_by),
-        booking_time: spaceData.booking_time === "" ? null : spaceData.booking_time,
+
+        // send 1/0 (MySQL boolean commonly stored/returned as 1/0)
+        is_available:
+          spaceData.is_available === true ||
+          spaceData.is_available === "true" ||
+          spaceData.is_available === 1 ||
+          spaceData.is_available === "1" ||
+          spaceData.is_available === "on"
+            ? 1
+            : 0,
+
+        booked_by:
+          spaceData.booked_by === "" || spaceData.booked_by == null
+            ? null
+            : Number(spaceData.booked_by),
+
+        // send MySQL-friendly datetime, or null
+        booking_time:
+          spaceData.booking_time === "" || spaceData.booking_time == null
+            ? null
+            : toMySQLDateTime(spaceData.booking_time),
+
+        space_image: spaceData.space_image ?? null,
       };
 
       await updateSpace(id, payload);
       navigate("/spaces");
     } catch (err) {
       setError(err.message || "Failed to update study space");
+    } finally {
       setBusy(false);
     }
   }
@@ -74,6 +144,7 @@ export default function EditSpace() {
       navigate("/spaces");
     } catch (err) {
       setError(err.message || "Failed to delete study space");
+    } finally {
       setBusy(false);
     }
   }
@@ -84,80 +155,59 @@ export default function EditSpace() {
 
   if (loading) {
     return (
-      <div className="loading-message">
-        <div className="loading-spinner"></div>
+      <main className="editspace-loading">
+        <h1>Edit Study Space</h1>
         <p>Loading study space...</p>
-      </div>
+      </main>
     );
   }
 
   if (error && !space) {
     return (
-      <>
-        <div className="page-header">
-          <div className="container">
-            <h2>Edit Study Space</h2>
-          </div>
-        </div>
-
-        <div className="form-page">
-          <div className="container">
-            <div className="error-message">{error}</div>
-
-            <button onClick={() => navigate("/spaces")} className="btn btn-primary">
-              Back to Spaces
-            </button>
-          </div>
-        </div>
-      </>
+      <main className="editspace-notfound">
+        <h1>Edit Study Space</h1>
+        <p className="spacelist-error-text">Error: {error}</p>
+        <button
+          onClick={() => navigate("/spaces")}
+          className="editspace-back-button"
+        >
+          Back to Space List
+        </button>
+      </main>
     );
   }
 
   return (
-    <>
-      <div className="page-header">
-        <div className="container">
-          <h2>Edit Study Space</h2>
-          <p>Update study space details</p>
+    <main className="editspace-main">
+      <h1 className="editspace-title">Edit Study Space</h1>
+
+      {error && (
+        <div className="editspace-error">
+          <strong>Error:</strong> {error}
         </div>
-      </div>
+      )}
 
-      <div className="form-page">
-        <div className="container">
-          {error && (
-            <div className="error-message">
-              <strong>Error:</strong> {error}
-            </div>
-          )}
+      {space && (
+        <>
+          <SpaceForm
+            space={space}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            busy={busy}
+          />
 
-          {space && (
-            <>
-              <SpaceForm
-                space={space}
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-                busy={busy}
-              />
-
-              <div className="delete-section">
-                <h3>Delete Study Space</h3>
-                <p>
-                  Once you delete this study space, it cannot be recovered.
-                  Please be certain.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={busy}
-                  className="btn btn-danger"
-                >
-                  Delete Space
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </>
+          <div className="editspace-delete">
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={busy}
+              className="editspace-delete-button"
+            >
+              Delete Space
+            </button>
+          </div>
+        </>
+      )}
+    </main>
   );
 }
