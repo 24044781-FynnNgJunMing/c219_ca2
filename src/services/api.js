@@ -35,7 +35,10 @@ export async function getSpaces() {
 export async function updateSpace(id, space) {
   const res = await fetch(`${API_URL}/editspace/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      ...authHeader()
+    },
     body: JSON.stringify(space),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -45,6 +48,9 @@ export async function updateSpace(id, space) {
 export async function deleteSpace(id) {
   const res = await fetch(`${API_URL}/deletespace/${id}`, {
     method: "DELETE",
+    headers: {
+      ...authHeader()
+    }
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();

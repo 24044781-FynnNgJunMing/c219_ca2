@@ -17,7 +17,7 @@ export default function Login() {
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             localStorage.setItem("token", data.token);
-            navigate("/cars/new");
+            navigate("/spaces/new");
         } catch (e2) {
             console.error(e2);
             setError("Login failed");
