@@ -5,17 +5,18 @@ export default function Navbar() {
 
   // Check if user is logged in
   const token = localStorage.getItem("token");
+  
   function handleLogout() {
     localStorage.removeItem("token");
-    navigate("/"); // or /login
+    navigate("/");
   }
 
   return (
     <header className="navbar-header">
       <div className="navbar-container">
-        <strong className="navbar-brand">
-          📇 StudySpace App
-        </strong>
+        <NavLink to="/" className="navbar-brand">
+          StudySpace
+        </NavLink>
 
         <nav className="navbar-nav">
           <NavLink
@@ -30,20 +31,25 @@ export default function Navbar() {
             to="/spaces"
             className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
           >
-            Study Space List
+            Browse Spaces
           </NavLink>
 
           <NavLink
             to="/spaces/new"
             className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
           >
-            Add Study Space
+            Add Space
           </NavLink>
 
           {token ? (
             <button onClick={handleLogout}>Logout</button>
           ) : (
-            <NavLink to="/login">Login</NavLink>
+            <NavLink 
+              to="/login"
+              className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+            >
+              Login
+            </NavLink>
           )}
         </nav>
       </div>

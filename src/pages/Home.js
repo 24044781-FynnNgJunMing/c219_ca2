@@ -5,53 +5,57 @@ export default function Home() {
     <div className="home">
       <section className="hero">
         <div className="hero-content">
-          <h1>Find Your Perfect Car</h1>
-          <p className="hero-subtitle">Quality vehicles at competitive prices</p>
+          <h1>Find Your Perfect Study Space</h1>
+          <p className="hero-subtitle">Library & Study Area Booking System</p>
           <p className="hero-description">
-            Browse our extensive collection of new and pre-owned vehicles.
-            From sedans to SUVs, find the car that fits your lifestyle and budget.
+            Stop wasting time searching for seats. Browse real-time availability 
+            across campus libraries and study areas. Book quiet zones for focused work 
+            or discussion spaces for group projects.
           </p>
-          <Link to="/cars" className="btn btn-primary btn-large">
-            Browse Cars
+          <Link to="/spaces" className="btn btn-primary btn-large">
+            Browse Study Spaces
           </Link>
         </div>
       </section>
 
       <section className="features">
         <div className="container">
-          <h2>Why Choose Us</h2>
+          <h2>Why Use StudySpace</h2>
 
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">Selection</div>
-              <h3>Wide Selection</h3>
+              <div className="feature-icon">Real-Time</div>
+              <h3>Live Availability</h3>
               <p>
-                Explore a diverse range of vehicles from trusted brands
-                and manufacturers.
+                See which study spaces are available right now. No more walking 
+                around campus looking for an empty seat.
               </p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">Pricing</div>
-              <h3>Best Prices</h3>
+              <div className="feature-icon">Book Ahead</div>
+              <h3>Reserve Your Space</h3>
               <p>
-                Competitive pricing with transparent deals and no hidden fees.
+                Secure your spot before you arrive. Perfect for group study 
+                sessions or exam preparation.
               </p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">Quality</div>
-              <h3>Quality Assured</h3>
+              <div className="feature-icon">Filters</div>
+              <h3>Find What You Need</h3>
               <p>
-                Every vehicle is thoroughly inspected and certified for your peace of mind.
+                Filter by group size, location, and zone type. Find quiet areas 
+                for solo work or discussion zones for collaboration.
               </p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">Support</div>
-              <h3>Expert Service</h3>
+              <div className="feature-icon">Smart Search</div>
+              <h3>Avoid the Crowds</h3>
               <p>
-                Professional support and guidance throughout your buying journey.
+                Know exactly which areas are busy or available. Make informed 
+                decisions about where to study.
               </p>
             </div>
           </div>
@@ -60,10 +64,10 @@ export default function Home() {
 
       <section className="cta-section">
         <div className="container">
-          <h2>Ready to Find Your Next Car?</h2>
-          <p>Start browsing our inventory today</p>
-          <Link to="/cars" className="btn btn-outline btn-large">
-            View All Cars
+          <h2>Ready to Find Your Study Space?</h2>
+          <p>Browse available spaces and book your perfect spot today</p>
+          <Link to="/spaces" className="btn btn-outline btn-large">
+            View All Spaces
           </Link>
         </div>
       </section>

@@ -26,17 +26,28 @@ export default function AddSpace() {
   }
 
   return (
-    <div>
-      <h2>Add Study Space</h2>
+    <>
+      <div className="page-header">
+        <h2>Add Study Space</h2>
+        <p>Create a new study space listing</p>
+      </div>
 
-      {error && <p>Error: {error}</p>}
+      <div className="form-page">
+        <div className="container">
+          {error && (
+            <div className="error-message">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
 
-      <SpaceForm
-        space={null}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        busy={busy}
-      />
-    </div>
+          <SpaceForm
+            space={null}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            busy={busy}
+          />
+        </div>
+      </div>
+    </>
   );
 }
