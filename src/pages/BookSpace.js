@@ -14,35 +14,35 @@ export default function BookSpace() {
   const userId = localStorage.getItem("userId");
 
   useEffect(() => {
+    async function fetchSpace() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const spaces = await getSpaces();
+        const foundSpace = spaces.find((s) => s.id === parseInt(id, 10));
+
+        if (!foundSpace) {
+          setError("Study space not found");
+          setSpace(null);
+          return;
+        }
+
+        if (!foundSpace.is_available) {
+          setError("This space is already booked");
+        }
+
+        setSpace(foundSpace);
+      } catch (err) {
+        setError(err.message || "Failed to load study space");
+        setSpace(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     fetchSpace();
   }, [id]);
-
-  async function fetchSpace() {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const spaces = await getSpaces();
-      const foundSpace = spaces.find((s) => s.id === parseInt(id, 10));
-
-      if (!foundSpace) {
-        setError("Study space not found");
-        setSpace(null);
-        return;
-      }
-
-      if (!foundSpace.is_available) {
-        setError("This space is already booked");
-      }
-
-      setSpace(foundSpace);
-    } catch (err) {
-      setError(err.message || "Failed to load study space");
-      setSpace(null);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleSubmit(e) {
     e.preventDefault();

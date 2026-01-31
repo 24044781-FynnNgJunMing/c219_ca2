@@ -21,9 +21,9 @@ function toMySQLDateTime(value) {
   if (Number.isNaN(d.getTime())) return null;
 
   const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(
-    d.getUTCHours()
-  )}:${pad(d.getUTCMinutes())}:00`;
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(
+    d.getUTCDate()
+  )} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:00`;
 }
 
 export default function EditSpace() {
@@ -38,40 +38,42 @@ export default function EditSpace() {
   const userRole = localStorage.getItem("userRole");
 
   useEffect(() => {
+    // students are not allowed, so don't bother fetching
     if (userRole === "student") return;
+
+    async function fetchSpace() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const spaces = await getSpaces();
+        const foundSpace = spaces.find((s) => s.id === parseInt(id, 10));
+
+        if (!foundSpace) {
+          setError("Study space not found");
+          setSpace(null);
+          return;
+        }
+
+        setSpace({
+          ...foundSpace,
+          is_available:
+            foundSpace.is_available === 1 ||
+            foundSpace.is_available === true ||
+            foundSpace.is_available === "1" ||
+            foundSpace.is_available === "true",
+          booking_time: toDateTimeLocal(foundSpace.booking_time),
+        });
+      } catch (err) {
+        setError(err.message || "Failed to load study space");
+        setSpace(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     fetchSpace();
   }, [id, userRole]);
-
-  async function fetchSpace() {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const spaces = await getSpaces();
-      const foundSpace = spaces.find((s) => s.id === parseInt(id, 10));
-
-      if (!foundSpace) {
-        setError("Study space not found");
-        setSpace(null);
-        return;
-      }
-
-      setSpace({
-        ...foundSpace,
-        is_available:
-          foundSpace.is_available === 1 ||
-          foundSpace.is_available === true ||
-          foundSpace.is_available === "1" ||
-          foundSpace.is_available === "true",
-        booking_time: toDateTimeLocal(foundSpace.booking_time),
-      });
-    } catch (err) {
-      setError(err.message || "Failed to load study space");
-      setSpace(null);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleSubmit(spaceData) {
     try {
