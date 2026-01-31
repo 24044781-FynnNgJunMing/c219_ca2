@@ -5,36 +5,25 @@ import { getSpaces, updateSpace, deleteSpace } from "../services/api";
 
 function toDateTimeLocal(value) {
   if (!value) return "";
-  const d = new Date(value);
+  const d = new Date(value.includes("Z") ? value : value + "Z");
   if (Number.isNaN(d.getTime())) return "";
 
   const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
-    d.getDate()
-  )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`;
 }
 
 function toMySQLDateTime(value) {
   if (!value) return null;
 
-  if (value.includes("T")) {
-    const parts = value.split("T");
-    const date = parts[0];
-    const time = parts[1] || "";
-    const hhmm = time.slice(0, 5);
-    if (!date || hhmm.length !== 5) return null;
-    return `${date} ${hhmm}:00`;
-  }
-
   const d = new Date(value);
-  if (!Number.isNaN(d.getTime())) {
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
-      d.getDate()
-    )} ${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
-  }
+  if (Number.isNaN(d.getTime())) return null;
 
-  return null;
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(
+    d.getUTCHours()
+  )}:${pad(d.getUTCMinutes())}:00`;
 }
 
 export default function EditSpace() {
@@ -146,7 +135,6 @@ export default function EditSpace() {
     navigate("/spaces");
   }
 
-  // 🚫 Block students from editing spaces – same layout style as AddSpace guard
   if (userRole === "student") {
     return (
       <>
@@ -169,7 +157,6 @@ export default function EditSpace() {
     );
   }
 
-  // Loading state – same style wrapper
   if (loading) {
     return (
       <>
@@ -187,7 +174,6 @@ export default function EditSpace() {
     );
   }
 
-  // Error with no space found – same style wrapper
   if (error && !space) {
     return (
       <>
@@ -213,7 +199,6 @@ export default function EditSpace() {
     );
   }
 
-  // Main edit form – matches AddSpace layout, but with Edit text + delete section
   return (
     <>
       <div className="page-header">

@@ -3,6 +3,18 @@ import { useNavigate } from "react-router-dom";
 import SpaceForm from "../components/SpaceForm";
 import { addSpace } from "../services/api";
 
+function toMySQLDateTime(value) {
+  if (!value) return null;
+
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(
+    d.getUTCHours()
+  )}:${pad(d.getUTCMinutes())}:00`;
+}
+
 export default function AddSpace() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -37,7 +49,31 @@ export default function AddSpace() {
       setBusy(true);
       setError(null);
 
-      await addSpace(spaceData);
+      const payload = {
+        space_name: spaceData.space_name,
+        location: spaceData.location,
+        capacity: Number(spaceData.capacity),
+        zone_type: spaceData.zone_type,
+        is_available:
+          spaceData.is_available === true ||
+          spaceData.is_available === "true" ||
+          spaceData.is_available === 1 ||
+          spaceData.is_available === "1" ||
+          spaceData.is_available === "on"
+            ? 1
+            : 0,
+        booked_by:
+          spaceData.booked_by === "" || spaceData.booked_by == null
+            ? null
+            : Number(spaceData.booked_by),
+        booking_time:
+          spaceData.booking_time === "" || spaceData.booking_time == null
+            ? null
+            : toMySQLDateTime(spaceData.booking_time),
+        space_image: spaceData.space_image ?? null,
+      };
+
+      await addSpace(payload);
       navigate("/spaces");
     } catch (err) {
       setError(err.message || "Failed to add space");
